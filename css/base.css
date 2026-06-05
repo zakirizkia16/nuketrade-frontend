@@ -1,0 +1,79 @@
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: #c8e0d4;
+    overflow-x: hidden
+}
+
+.cv {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums
+}
+
+.glow-text {
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.4)
+}
+
+.grid-bg {
+    background-image: linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px
+}
+
+.hero-bg {
+    background: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0, 255, 136, 0.1) 0%, transparent 60%), radial-gradient(ellipse 50% 30% at 80% 50%, rgba(0, 194, 255, 0.04) 0%, transparent 50%), var(--bg)
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all .5s cubic-bezier(.4, 0, .2, 1)
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0)
+}
+
+.ticker-scroll {
+    animation: ticker 35s linear infinite
+}
+
+@keyframes ticker {
+    0% {
+        transform: translateX(0)
+    }
+
+    100% {
+        transform: translateX(-50%)
+    }
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: .2;
+    animation: fu linear infinite
+}
+
+@keyframes fu {
+    0% {
+        transform: translateY(0);
+        opacity: 0
+    }
+
+    10% {
+        opacity: .2
+    }
+
+    90% {
+        opacity: .2
+    }
+
+    100% {
+        transform: translateY(-100vh);
+        opacity: 0
+    }
+}

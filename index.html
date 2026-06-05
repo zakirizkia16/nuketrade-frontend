@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nuke Trade — On-Chain Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config={theme:{extend:{fontFamily:{display:['Space Grotesk','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{chain:{bg:'#060b0a',surface:'#0d1512',card:'#111c18',border:'#1a2e26',muted:'#4a6b5d',text:'#c8e0d4',bright:'#e8f5ee',accent:'#00ff88',accentDim:'#00cc6a',warn:'#ff6b35',danger:'#ff3558',info:'#00c2ff',purple:'#a855f7'}}}}}
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="grid-bg md:pb-0 pb-16">
+<div id="particles" class="fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
+
+<!-- Ticker -->
+<div class="fixed top-0 left-0 right-0 z-50 bg-chain-surface/90 backdrop-blur-md border-b border-chain-border overflow-hidden flex items-center" style="height:var(--ticker-h)">
+    <div class="flex items-center gap-1.5 px-2 border-r border-chain-border h-full shrink-0"><div class="pulse-dot"></div><span class="text-[10px] font-mono text-chain-accent uppercase tracking-wider">Live</span></div>
+    <div class="overflow-hidden flex-1"><div class="ticker-scroll flex items-center gap-6 whitespace-nowrap" id="tickerContent"></div></div>
+</div>
+
+<!-- Desktop Top Nav -->
+<header class="hidden md:flex fixed top-0 left-0 right-0 z-40 bg-chain-bg/80 backdrop-blur-xl border-b border-chain-border items-center px-6 gap-6" style="top:var(--ticker-h);height:56px">
+    <a href="#" class="flex items-center gap-2 shrink-0"><div class="w-7 h-7 rounded-md bg-gradient-to-br from-chain-accent to-emerald-600 flex items-center justify-center"><i class="fa-solid fa-radiation text-chain-bg text-[11px]"></i></div><span class="font-display font-bold text-chain-bright text-sm">Nuke<span class="text-chain-accent">Trade</span></span></a>
+    <nav class="flex items-center gap-5 flex-1"><a href="#dashboard" class="nl active text-sm font-medium text-chain-muted relative transition-colors" data-nl="dashboard">Dashboard</a><a href="#liquidation" class="nl text-sm font-medium text-chain-muted relative" data-nl="liquidation">Liq Map</a><a href="#whalehunt" class="nl text-sm font-medium text-chain-muted relative" data-nl="whalehunt">Whale Hunt</a><a href="#inflow" class="nl text-sm font-medium text-chain-muted relative" data-nl="inflow">Inflow</a><a href="#predictions" class="nl text-sm font-medium text-chain-muted relative" data-nl="predictions">Predictions</a></nav>
+    <div class="flex items-center gap-2">
+        <button class="flex items-center gap-2 bg-chain-surface border border-chain-border rounded-lg px-3 py-1.5 text-xs text-chain-muted hover:border-chain-accent/30 transition-all min-w-[180px]" id="searchBtnD" aria-label="Search"><i class="fa-solid fa-magnifying-glass text-[10px]"></i><span>Search...</span><kbd class="ml-auto px-1.5 py-0.5 bg-chain-card rounded text-[9px] font-mono border border-chain-border">/</kbd></button>
+        <button class="relative w-8 h-8 rounded-lg bg-chain-surface border border-chain-border flex items-center justify-center text-chain-muted hover:text-chain-accent hover:border-chain-accent/30 transition-all" id="alertBtnD" aria-label="Alerts"><i class="fa-solid fa-bell text-sm"></i><span class="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-chain-danger text-white text-[8px] font-mono font-bold flex items-center justify-center px-0.5" id="alertBadgeD">3</span></button>
+        <button class="px-3 py-1.5 bg-chain-accent/10 border border-chain-accent/30 text-chain-accent text-xs font-semibold rounded-lg hover:bg-chain-accent/20 transition-all" id="connectBtnD"><i class="fa-solid fa-wallet mr-1"></i>Connect</button>
+    </div>
+</header>
+
+<!-- Mobile Top Bar -->
+<header class="md:hidden fixed left-0 right-0 z-40 bg-chain-bg/90 backdrop-blur-xl border-b border-chain-border flex items-center px-3 gap-2" style="top:var(--ticker-h);height:48px">
+    <a href="#" class="flex items-center gap-1.5 shrink-0"><div class="w-6 h-6 rounded-md bg-gradient-to-br from-chain-accent to-emerald-600 flex items-center justify-center"><i class="fa-solid fa-radiation text-chain-bg text-[9px]"></i></div><span class="font-display font-bold text-chain-bright text-sm">Nuke<span class="text-chain-accent">Trade</span></span></a>
+    <div class="flex-1"></div>
+    <button class="w-8 h-8 rounded-lg bg-chain-surface border border-chain-border flex items-center justify-center text-chain-muted active:text-chain-accent" id="searchBtnM"><i class="fa-solid fa-magnifying-glass text-xs"></i></button>
+    <button class="relative w-8 h-8 rounded-lg bg-chain-surface border border-chain-border flex items-center justify-center text-chain-muted active:text-chain-accent" id="alertBtnM"><i class="fa-solid fa-bell text-xs"></i><span class="absolute -top-1 -right-1 min-w-[13px] h-[13px] rounded-full bg-chain-danger text-white text-[7px] font-mono font-bold flex items-center justify-center" id="alertBadgeM">3</span></button>
+</header>
+
+<!-- Bottom Nav (Mobile) -->
+<nav class="bnav md:hidden" id="bottomNav" aria-label="Mobile navigation">
+    <a href="#dashboard" class="bnav-i active text-chain-muted" data-bn="dashboard"><i class="fa-solid fa-gauge"></i><span>Home</span></a>
+    <a href="#liquidation" class="bnav-i text-chain-muted" data-bn="liquidation"><i class="fa-solid fa-fire"></i><span>LiqMap</span></a>
+    <a href="#whalehunt" class="bnav-i text-chain-muted" data-bn="whalehunt"><i class="fa-solid fa-crosshairs"></i><span>Hunt</span></a>
+    <a href="#inflow" class="bnav-i text-chain-muted" data-bn="inflow"><i class="fa-solid fa-arrow-right-to-bracket"></i><span>Inflow</span></a>
+    <a href="#predictions" class="bnav-i text-chain-muted" data-bn="predictions"><i class="fa-solid fa-chart-simple"></i><span>Predict</span></a>
+</nav>
+
+<!-- Search Overlay -->
+<div class="search-ov fixed inset-0 z-[60] bg-chain-bg/90 backdrop-blur-xl flex items-start justify-center pt-16 md:pt-24 px-3" id="searchOv">
+    <div class="search-md w-full max-w-lg bg-chain-card border border-chain-border rounded-xl overflow-hidden">
+        <div class="flex items-center gap-2.5 px-3 py-3 border-b border-chain-border"><i class="fa-solid fa-magnifying-glass text-chain-accent text-sm"></i><input type="text" id="searchIn" class="flex-1 bg-transparent outline-none text-chain-bright text-sm placeholder:text-chain-muted" placeholder="Search token or address..." autocomplete="off"><kbd class="px-1.5 py-0.5 bg-chain-surface rounded text-[8px] font-mono text-chain-muted border border-chain-border">ESC</kbd></div>
+        <div class="max-h-[60vh] overflow-y-auto" id="searchRes"><div class="px-4 py-6 text-center text-chain-muted text-xs">Type to search tokens...</div></div>
+    </div>
+</div>
+
+<!-- Alert Panel -->
+<div class="abk fixed inset-0 z-[55] bg-chain-bg/60" id="aBk"></div>
+<div class="ap fixed top-0 right-0 bottom-0 z-[56] w-full sm:w-96 bg-chain-card border-l border-chain-border overflow-y-auto" id="aPn">
+    <div class="sticky top-0 z-10 bg-chain-card border-b border-chain-border px-4 py-3 flex items-center justify-between"><span class="font-semibold text-chain-bright text-sm">Alerts</span><button class="w-7 h-7 rounded-lg bg-chain-surface flex items-center justify-center text-chain-muted" onclick="closeAP()"><i class="fa-solid fa-xmark text-xs"></i></button></div>
+    <div class="p-3 space-y-2" id="aList"></div>
+    <div class="border-t border-chain-border p-3 space-y-2">
+        <div class="text-xs font-semibold text-chain-bright">Quick Alert</div>
+        <div class="grid grid-cols-2 gap-2">
+            <button class="qa p-2.5 bg-chain-surface border border-chain-border rounded-lg text-left active:border-chain-accent/30" data-c="above" data-v="$110K"><div class="text-[9px] text-chain-muted">BTC Above</div><div class="cv text-xs font-bold text-chain-bright">$110,000</div></button>
+            <button class="qa p-2.5 bg-chain-surface border border-chain-border rounded-lg text-left active:border-chain-accent/30" data-c="whale" data-v="$10M"><div class="text-[9px] text-chain-muted">Whale Txn</div><div class="cv text-xs font-bold text-chain-bright">> $10M</div></button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="fixed top-16 right-3 z-[80] flex flex-col gap-2 max-w-[280px]" id="toastC"></div>
+
+<main>
+<!-- DASHBOARD -->
+<section id="dashboard" class="hero-bg">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6 pt-4 pb-6" style="padding-top:calc(var(--ticker-h) + 56px + 12px)">
+        <div class="mb-4 fade-in"><h1 class="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-chain-bright tracking-tight">On-Chain <span class="text-chain-accent glow-text">Intelligence</span></h1><p class="mt-0.5 text-chain-muted text-xs sm:text-sm">Liquidation map, whale hunt, inflow checker & more</p></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 fade-in" data-delay="50">
+            <div class="mc bg-chain-card rounded-lg p-3 sm:p-4"><div class="flex items-center justify-between mb-1"><span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-chain-muted font-medium">BTC</span><i class="fa-brands fa-bitcoin text-orange-400 text-[10px]"></i></div><div class="cv text-lg sm:text-xl lg:text-2xl font-bold text-chain-bright" id="btcP">$104,287</div><div class="flex items-center gap-1 mt-0.5"><i class="fa-solid fa-caret-up text-chain-accent text-[9px]" id="btcC"></i><span class="text-chain-accent text-[10px] cv font-medium" id="btcCh">+2.34%</span></div><div class="candle-s mt-1.5" id="cBtc"></div></div>
+            <div class="mc bg-chain-card rounded-lg p-3 sm:p-4"><div class="flex items-center justify-between mb-1"><span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-chain-muted font-medium">ETH</span><i class="fa-brands fa-ethereum text-chain-info text-[10px]"></i></div><div class="cv text-lg sm:text-xl lg:text-2xl font-bold text-chain-bright" id="ethP">$2,541</div><div class="flex items-center gap-1 mt-0.5"><i class="fa-solid fa-caret-up text-chain-accent text-[9px]" id="ethC"></i><span class="text-chain-accent text-[10px] cv font-medium" id="ethCh">+1.87%</span></div><div class="candle-s mt-1.5" id="cEth"></div></div>
+            <div class="mc bg-chain-card rounded-lg p-3 sm:p-4"><div class="flex items-center justify-between mb-1"><span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-chain-muted font-medium">TVL</span><i class="fa-solid fa-lock text-chain-accent text-[10px]"></i></div><div class="cv text-lg sm:text-xl lg:text-2xl font-bold text-chain-bright">$187.4B</div><div class="flex items-center gap-1 mt-0.5"><i class="fa-solid fa-caret-up text-chain-accent text-[9px]" id="tvlC"></i><span class="text-chain-accent text-[10px] cv font-medium" id="tvlCh">+1.12%</span></div><div class="candle-s mt-1.5" id="cTvl"></div></div>
+            <div class="mc bg-chain-card rounded-lg p-3 sm:p-4"><div class="flex items-center justify-between mb-1"><span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-chain-muted font-medium">Gas</span><i class="fa-solid fa-gas-pump text-chain-warn text-[10px]"></i></div><div class="cv text-lg sm:text-xl lg:text-2xl font-bold text-chain-bright" id="gasP">18 Gwei</div><div class="flex items-center gap-2 mt-0.5 text-[9px] font-mono"><span class="text-chain-accent">&#9679;12</span><span class="text-chain-warn">&#9679;18</span><span class="text-chain-danger">&#9679;24</span></div><div class="candle-s mt-1.5" id="cGas"></div></div>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 mb-5 fade-in" data-delay="80">
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border"><div class="text-[8px] uppercase text-chain-muted">24h Liq</div><div class="cv text-[11px] font-bold text-chain-danger">$284M</div></div>
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border"><div class="text-[8px] uppercase text-chain-muted">Net Flow</div><div class="cv text-[11px] font-bold text-chain-accent">-$682M</div></div>
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border"><div class="text-[8px] uppercase text-chain-muted">F&G</div><div class="cv text-[11px] font-bold text-chain-warn">68</div></div>
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border hidden sm:block"><div class="text-[8px] uppercase text-chain-muted">Vol</div><div class="cv text-[11px] font-bold text-chain-bright">$48.2B</div></div>
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border hidden sm:block"><div class="text-[8px] uppercase text-chain-muted">Whales</div><div class="cv text-[11px] font-bold text-chain-bright">2,847</div></div>
+            <div class="bg-chain-card/60 rounded-md p-2 border border-chain-border hidden sm:block"><div class="text-[8px] uppercase text-chain-muted">Stable MC</div><div class="cv text-[11px] font-bold text-chain-bright">$178B</div></div>
+        </div>
+        <div class="bg-chain-card rounded-lg border border-chain-border p-3 sm:p-4 fade-in" data-delay="120">
+            <div class="flex items-center justify-between mb-3"><span class="text-xs font-semibold text-chain-bright">Activity</span><div class="flex gap-1"><button class="px-2 py-0.5 text-[10px] text-chain-accent border-b border-chain-accent">7D</button><button class="px-2 py-0.5 text-[10px] text-chain-muted">30D</button></div></div>
+            <div class="h-36 sm:h-52 lg:h-64"><canvas id="mainCh"></canvas></div>
+        </div>
+    </div>
+</section>
+
+<!-- LIQUIDATION MAP -->
+<section id="liquidation" class="py-6 sm:py-10 bg-chain-surface/30">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in"><div class="w-8 h-8 rounded-lg bg-chain-danger/10 border border-chain-danger/20 flex items-center justify-center"><i class="fa-solid fa-fire text-chain-danger text-xs"></i></div><div><h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Liquidation Map</h2><p class="text-chain-muted text-[10px] sm:text-xs hidden sm:block">Zona liquidasi & level harga berisiko</p></div></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 fade-in" data-delay="20">
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">24h Liqs</div><div class="cv text-base sm:text-lg font-bold text-chain-danger">$284.7M</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">BTC Liqs</div><div class="cv text-base sm:text-lg font-bold text-chain-danger">$142.4M</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">ETH Liqs</div><div class="cv text-base sm:text-lg font-bold text-chain-danger">$87.2M</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">Biggest</div><div class="cv text-base sm:text-lg font-bold text-chain-warn">$18.4M</div></div>
+        </div>
+        <div class="flex gap-1 mb-3 fade-in" data-delay="40"><button class="lt active px-2.5 py-1 text-[10px] font-medium rounded-md bg-chain-accent/10 text-chain-accent border border-chain-accent/20" data-a="btc">BTC</button><button class="lt px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border" data-a="eth">ETH</button><button class="lt px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border" data-a="sol">SOL</button></div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 fade-in" data-delay="60">
+            <div class="lg:col-span-3 bg-chain-card rounded-lg border border-chain-border overflow-hidden">
+                <div class="px-3 py-2.5 border-b border-chain-border text-xs font-semibold text-chain-bright">Levels by Price</div>
+                <div class="p-2 sm:p-3 space-y-0.5" id="liqList"></div>
+            </div>
+            <div class="lg:col-span-2 bg-chain-card rounded-lg border border-chain-border p-3 sm:p-4">
+                <div class="text-xs font-semibold text-chain-bright mb-2">Volume 24h</div>
+                <div class="h-44 sm:h-56 lg:h-64"><canvas id="liqCh"></canvas></div>
+            </div>
+        </div>
+        <div class="bg-chain-card rounded-lg border border-chain-border overflow-hidden fade-in" data-delay="80">
+            <div class="px-3 py-2.5 border-b border-chain-border text-xs font-semibold text-chain-bright">Recent Liquidations</div>
+            <div class="overflow-x-auto"><table class="rt"><thead><tr><th>Time</th><th>Asset</th><th>Side</th><th>Size</th><th>Value</th><th>Price</th><th class="hidden sm:table-cell">Exchange</th></tr></thead><tbody id="liqTb"></tbody></table></div>
+        </div>
+    </div>
+</section>
+
+<!-- WHALE HUNT -->
+<section id="whalehunt" class="py-6 sm:py-10">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in"><div class="w-8 h-8 rounded-lg bg-chain-accent/10 border border-chain-accent/20 flex items-center justify-center"><i class="fa-solid fa-crosshairs text-chain-accent text-xs"></i></div><div><h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Whale Hunt</h2><p class="text-chain-muted text-[10px] sm:text-xs hidden sm:block">Lacak & ikuti wallet whale</p></div></div>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-4 fade-in" data-delay="20">
+            <div class="mc bg-chain-card rounded-lg p-2.5 sm:p-3"><div class="text-[8px] uppercase text-chain-muted">Tracked</div><div class="cv text-sm sm:text-base font-bold text-chain-bright">1,247</div></div>
+            <div class="mc bg-chain-card rounded-lg p-2.5 sm:p-3"><div class="text-[8px] uppercase text-chain-muted">SM Score</div><div class="cv text-sm sm:text-base font-bold text-chain-accent">87.4</div></div>
+            <div class="mc bg-chain-card rounded-lg p-2.5 sm:p-3"><div class="text-[8px] uppercase text-chain-muted">Hunting</div><div class="cv text-sm sm:text-base font-bold text-chain-bright" id="hCnt">0</div></div>
+        </div>
+        <div class="flex gap-1 mb-3 overflow-x-auto pb-1 fade-in" data-delay="40" style="-webkit-overflow-scrolling:touch">
+            <button class="wf active px-2.5 py-1 text-[10px] font-medium rounded-md bg-chain-accent/10 text-chain-accent border border-chain-accent/20 whitespace-nowrap" data-f="all">All</button>
+            <button class="wf px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border whitespace-nowrap" data-f="smart">Smart</button>
+            <button class="wf px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border whitespace-nowrap" data-f="fund">Funds</button>
+            <button class="wf px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border whitespace-nowrap" data-f="exchange">Exchange</button>
+            <button class="wf px-2.5 py-1 text-[10px] font-medium rounded-md text-chain-muted border border-chain-border whitespace-nowrap" data-f="mev">MEV</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3 fade-in" data-delay="60" id="whaleG"></div>
+    </div>
+</section>
+
+<!-- CEK INFLOW -->
+<section id="inflow" class="py-6 sm:py-10 bg-chain-surface/30">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in"><div class="w-8 h-8 rounded-lg bg-chain-info/10 border border-chain-info/20 flex items-center justify-center"><i class="fa-solid fa-arrow-right-to-bracket text-chain-info text-xs"></i></div><div><h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Cek Inflow</h2><p class="text-chain-muted text-[10px] sm:text-xs hidden sm:block">Aliran modal & selling pressure</p></div></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 fade-in" data-delay="20">
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">Net Flow</div><div class="cv text-base sm:text-lg font-bold text-chain-accent">-$682M</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">Inflow Ratio</div><div class="cv text-base sm:text-lg font-bold text-chain-warn">0.78</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">Inflow</div><div class="cv text-base sm:text-lg font-bold text-chain-danger">$2.41B</div></div>
+            <div class="mc bg-chain-card rounded-lg p-3"><div class="text-[9px] uppercase text-chain-muted">Outflow</div><div class="cv text-base sm:text-lg font-bold text-chain-accent">$3.09B</div></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4 fade-in" data-delay="40">
+            <div class="bg-chain-card rounded-lg border border-chain-border p-3 sm:p-4"><div class="text-xs font-semibold text-chain-bright mb-2">Inflow/Outflow (BTC)</div><div class="h-40 sm:h-52 lg:h-60"><canvas id="ifCh"></canvas></div></div>
+            <div class="bg-chain-card rounded-lg border border-chain-border p-3 sm:p-4"><div class="text-xs font-semibold text-chain-bright mb-2">By Exchange</div><div class="h-40 sm:h-52 lg:h-60"><canvas id="ifExCh"></canvas></div></div>
+        </div>
+        <div class="bg-chain-card rounded-lg border border-chain-border overflow-hidden fade-in" data-delay="60">
+            <div class="px-3 py-2.5 border-b border-chain-border text-xs font-semibold text-chain-bright">Top Inflow Txns</div>
+            <div class="overflow-x-auto"><table class="rt"><thead><tr><th>Time</th><th>Token</th><th>From</th><th>To</th><th>Amount</th><th>Value</th><th>Signal</th></tr></thead><tbody id="ifTb"></tbody></table></div>
+        </div>
+    </div>
+</section>
+
+<!-- PREDICTIONS -->
+<section id="predictions" class="py-6 sm:py-10">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in"><div class="w-8 h-8 rounded-lg bg-chain-purple/10 border border-chain-purple/20 flex items-center justify-center"><i class="fa-solid fa-chart-simple text-chain-purple text-xs"></i></div><div><h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Predictions</h2></div></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 fade-in" data-delay="20" id="predG"></div>
+    </div>
+</section>
+
+<!-- WHALES FEED -->
+<section id="whales" class="py-6 sm:py-10 bg-chain-surface/30">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in"><div class="w-8 h-8 rounded-lg bg-chain-warn/10 border border-chain-warn/20 flex items-center justify-center"><i class="fa-solid fa-fish-fins text-chain-warn text-xs"></i></div><h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Live Whale Feed</h2></div>
+        <div class="bg-chain-card rounded-lg border border-chain-border overflow-hidden fade-in">
+            <div class="flex items-center gap-2 px-3 py-2 border-b border-chain-border"><div class="pulse-dot"></div><span class="text-[10px] font-mono text-chain-accent uppercase">Live</span></div>
+            <div class="overflow-x-auto"><table class="rt"><thead><tr><th>Time</th><th>Type</th><th>From</th><th>To</th><th>Value</th><th>USD</th></tr></thead><tbody id="whTb"></tbody></table></div>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer class="hidden md:block border-t border-chain-border py-6 bg-chain-surface/30">
+    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-md bg-gradient-to-br from-chain-accent to-emerald-600 flex items-center justify-center"><i class="fa-solid fa-radiation text-chain-bg text-[9px]"></i></div><span class="font-display font-bold text-sm text-chain-bright">Nuke<span class="text-chain-accent">Trade</span></span></div>
+        <span class="text-[11px] text-chain-muted">&copy; 2025 Nuke Trade</span>
+        <div class="flex gap-4"><a href="#" class="text-chain-muted hover:text-chain-accent"><i class="fa-brands fa-x-twitter"></i></a><a href="#" class="text-chain-muted hover:text-chain-accent"><i class="fa-brands fa-discord"></i></a><a href="#" class="text-chain-muted hover:text-chain-accent"><i class="fa-brands fa-telegram"></i></a></div>
+    </div>
+</footer>
+
+<!-- JS Scripts -->
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
