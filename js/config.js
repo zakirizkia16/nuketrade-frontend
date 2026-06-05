@@ -1,5 +1,5 @@
 // Backend Config
-const API_BASE = 'https://quotes-workplace-towards-jackie.trycloudflare.com';
+const API_BASE = 'https://quotes-workplace-towards-jackie.trycloudflare.com/api';
 
 // Data
 const TD = [{ s: 'BTC', n: 'Bitcoin', p: 104287, ch: 2.34, ic: 'fa-brands fa-bitcoin', icc: 'text-orange-400' }, { s: 'ETH', n: 'Ethereum', p: 2541, ch: 1.87, ic: 'fa-brands fa-ethereum', icc: 'text-chain-info' }, { s: 'SOL', n: 'Solana', p: 142.87, ch: -0.92, ic: 'fa-solid fa-sun', icc: 'text-purple-400' }, { s: 'LINK', n: 'Chainlink', p: 17.83, ch: 5.67, ic: 'fa-solid fa-link', icc: 'text-blue-400' }, { s: 'AAVE', n: 'Aave', p: 168.24, ch: 4.12, ic: 'fa-solid fa-ghost', icc: 'text-purple-300' }, { s: 'DOGE', n: 'Dogecoin', p: 0.164, ch: 8.21, ic: 'fa-solid fa-dog', icc: 'text-yellow-300' }];
