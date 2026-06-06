@@ -1,6 +1,13 @@
 // Backend Config
-const API_BASE = 'https://quotes-workplace-towards-jackie.trycloudflare.com/api';
+// URL Gudang Vercel lo
+const API_BASE = 'https://nuketrade-backend-v2.vercel.app/api';
 
+// Kunci Satpam Supabase
+const SUPABASE_URL = 'https://khtzvtktdnwpyspqzshk.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtodHp2dGt0ZG53cHlzcHF6c2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3Mzg4NTAsImV4cCI6MjA5NjMxNDg1MH0.E5bBe2wHlB-SfSqNuluTQHidO16n1jNEt0Xm8p5Tgr0';
+
+// Nyuruh browser bikin koneksi ke Supabase
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Data
 const TD = [{ s: 'BTC', n: 'Bitcoin', p: 104287, ch: 2.34, ic: 'fa-brands fa-bitcoin', icc: 'text-orange-400' }, { s: 'ETH', n: 'Ethereum', p: 2541, ch: 1.87, ic: 'fa-brands fa-ethereum', icc: 'text-chain-info' }, { s: 'SOL', n: 'Solana', p: 142.87, ch: -0.92, ic: 'fa-solid fa-sun', icc: 'text-purple-400' }, { s: 'LINK', n: 'Chainlink', p: 17.83, ch: 5.67, ic: 'fa-solid fa-link', icc: 'text-blue-400' }, { s: 'AAVE', n: 'Aave', p: 168.24, ch: 4.12, ic: 'fa-solid fa-ghost', icc: 'text-purple-300' }, { s: 'DOGE', n: 'Dogecoin', p: 0.164, ch: 8.21, ic: 'fa-solid fa-dog', icc: 'text-yellow-300' }];
 const TI = [{ l: 'BTC', pr: '$104,287', c: '+2.34%', u: true }, { l: 'ETH', pr: '$2,541', c: '+1.87%', u: true }, { l: 'SOL', pr: '$142', c: '-0.92%', u: false }, { l: 'LINK', pr: '$17.83', c: '+5.67%', u: true }, { l: 'AAVE', pr: '$168', c: '+4.12%', u: true }, { l: 'DOGE', pr: '$0.164', c: '+8.21%', u: true }];

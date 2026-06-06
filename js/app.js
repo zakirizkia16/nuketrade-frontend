@@ -101,3 +101,19 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth(); // <--- DIMATIIN SEMENTARA BIAR LANGSUNG MASUK
 });
+// ==========================================
+// LOGIN AUTH (Supabase)
+// ==========================================
+async function checkAuth() {
+    // Cek sesi Supabase
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (session) {
+        initNukeTrade(); // User udah login, jalankan app
+    } else {
+        window.location.href = '/login.html'; // Belum login, redirect ke login form
+    }
+}
+
+// Jalankan Auth pertama kali
+document.addEventListener('DOMContentLoaded', checkAuth);

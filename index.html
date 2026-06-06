@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nuke Trade — On-Chain Analytics</title>
@@ -33,6 +34,9 @@
         <button class="flex items-center gap-2 bg-chain-surface border border-chain-border rounded-lg px-3 py-1.5 text-xs text-chain-muted hover:border-chain-accent/30 transition-all min-w-[180px]" id="searchBtnD" aria-label="Search"><i class="fa-solid fa-magnifying-glass text-[10px]"></i><span>Search...</span><kbd class="ml-auto px-1.5 py-0.5 bg-chain-card rounded text-[9px] font-mono border border-chain-border">/</kbd></button>
         <button class="relative w-8 h-8 rounded-lg bg-chain-surface border border-chain-border flex items-center justify-center text-chain-muted hover:text-chain-accent hover:border-chain-accent/30 transition-all" id="alertBtnD" aria-label="Alerts"><i class="fa-solid fa-bell text-sm"></i><span class="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-chain-danger text-white text-[8px] font-mono font-bold flex items-center justify-center px-0.5" id="alertBadgeD">3</span></button>
         <button class="px-3 py-1.5 bg-chain-accent/10 border border-chain-accent/30 text-chain-accent text-xs font-semibold rounded-lg hover:bg-chain-accent/20 transition-all" id="connectBtnD"><i class="fa-solid fa-wallet mr-1"></i>Connect</button>
+        <button onclick="supabaseClient.auth.signOut().then(() => location.href='/login.html')" class="px-3 py-1.5 text-chain-danger text-xs font-semibold rounded-lg hover:bg-chain-danger/10 transition-all">
+    <i class="fa-solid fa-power-off mr-1"></i> Logout
+</button>
     </div>
 </header>
 
