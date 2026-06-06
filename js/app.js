@@ -1,4 +1,40 @@
 // ==========================================
+// FUNGSI HELPER: FETCH DATA + OTOMATIS BAWA TOKEN
+// ==========================================
+async function fetchWithAuth(url) {
+    // 1. Ambil session/token dari Supabase
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const token = session?.access_token;
+    
+    // 2. Kalau nggak ada token, hentikan
+    if (!token) {
+        console.error("Nggak ada token, user belum login!");
+        return null;
+    }
+
+    // 3. Fetch ke Vercel sambil bawa token di Header
+    try {
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` } // <--- INI KUNCINYA
+        });
+
+        if (res.status === 401) {
+            console.error("Token ditolak (401 Unauthorized)");
+            return null;
+        }
+
+        if (!res.ok) {
+            console.error("Gagal fetch data:", res.status);
+            return null;
+        }
+
+        return await res.json();
+    } catch (err) {
+        console.error("Error fetch:", err);
+        return null;
+    }
+}
+// ==========================================
 // AUTH GATE (SISTEM KEAMANAN BACKEND)
 // ==========================================
 async function checkAuth() {
@@ -117,3 +153,60 @@ async function checkAuth() {
 
 // Jalankan Auth pertama kali
 document.addEventListener('DOMContentLoaded', checkAuth);
+// ==========================================
+// FETCH HARGA CRYPTO
+// ==========================================
+async function fetchRealPrices() {
+    const data = await fetchWithAuth(`${API_BASE}/data?endpoint=price`);
+    if (data) {
+        if (data.bitcoin) { 
+            bB = data.bitcoin.usd; 
+            bC = data.bitcoin.usd_24h_change; 
+        }
+        if (data.ethereum) { 
+            eB = data.ethereum.usd; 
+            eC = data.ethereum.usd_24h_change; 
+        }
+        // Update DOM lo di sini (kalau ada)
+    }
+}
+
+// ==========================================
+// FETCH MEMPOOL
+// ==========================================
+async function fetchMempoolData() {
+    const data = await fetchWithAuth(`${API_BASE}/data?endpoint=mempool`);
+    if (data) {
+        // Update DOM Mempool lo di sini
+        // Contoh: document.getElementById('mempoolCount').innerText = data.count;
+    }
+}
+
+// ==========================================
+// FETCH BLOCKS
+// ==========================================
+async function fetchBlocksData() {
+    const data = await fetchWithAuth(`${API_BASE}/data?endpoint=blocks`);
+    if (data) {
+        // Update DOM Blocks lo di sini
+    }
+}
+
+// ==========================================
+// FETCH FEES
+// ==========================================
+async function fetchFeesData() {
+    const data = await fetchWithAuth(`${API_BASE}/data?endpoint=fees`);
+    if (data) {
+        // Update DOM Fees lo di sini
+    }
+}
+// Cek dulu kalau chart udah pernah dibikin, DESTROY dulu!
+if (window.nukeChart) {
+    window.nukeChart.destroy();
+}
+
+// Baru bikin chart baru
+window.nukeChart = new Chart(document.getElementById('mainCh'), {
+    // ... settingan chart lo yang lama taruh di sini ...
+});
