@@ -1,11 +1,11 @@
-// Inisialisasi Supabase Client (sama kayak di app.js)
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// HAPUS BARIS INI DARI KODE LO:
+// const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Fungsi Fetch dengan Auth (sama kayak di app.js)
 async function fetchWithAuth(url) {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession(); // Sekarang supabaseClient bakal kebaca dari config.js
     const token = session?.access_token;
-    if (!token) return window.location.href = '/login.html'; // Lepas ke login kalau belum login
+    if (!token) return window.location.href = '/login.html';
 
     try {
         const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -32,7 +32,6 @@ function formatLargeNum(num) {
 
 // Main Logic
 async function loadTokenData() {
-    // 1. Ambil ID dari URL (contoh: detail.html?id=dogecoin)
     const urlParams = new URLSearchParams(window.location.search);
     const tokenId = urlParams.get('id');
 
@@ -41,7 +40,7 @@ async function loadTokenData() {
         return;
     }
 
-    // 2. Fetch Data Detail Koin
+    // Fetch Data Detail Koin
     const detail = await fetchWithAuth(`${API_BASE}/data?endpoint=token_detail&id=${tokenId}`);
     
     if (detail) {
@@ -68,7 +67,7 @@ async function loadTokenData() {
         }
     }
 
-    // 3. Fetch Data Chart Harga (7 Hari)
+    // Fetch Data Chart Harga (7 Hari)
     const chartData = await fetchWithAuth(`${API_BASE}/data?endpoint=token_chart&id=${tokenId}`);
     if (chartData) {
         const prices = chartData.prices.map(p => p[1]);
@@ -100,7 +99,7 @@ async function loadTokenData() {
         });
     }
 
-    // 4. Render Pie Chart Holders (Simulasi - Karena API gratis nggak nyediain data holders real)
+    // Render Pie Chart Holders (Simulasi)
     const ctxHolders = document.getElementById('holdersChart').getContext('2d');
     new Chart(ctxHolders, {
         type: 'doughnut',
