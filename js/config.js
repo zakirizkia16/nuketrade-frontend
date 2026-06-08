@@ -2,14 +2,23 @@
 // URL Gudang Vercel lo
 const API_BASE = 'https://nuketrade-backend-v2.vercel.app/api';
 
-// Kunci Satpam Supabase
-const SUPABASE_URL = 'https://khtzvtktdnwpyspqzshk.supabase.co/rest/v1/';
+// Kunci Satpam Supabase (HAPUS /rest/v1/ NYA!)
+const SUPABASE_URL = 'https://khtzvtktdnwpyspqzshk.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtodHp2dGt0ZG53cHlzcHF6c2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3Mzg4NTAsImV4cCI6MjA5NjMxNDg1MH0.E5bBe2wHlB-SfSqNuluTQHidO16n1jNEt0Xm8p5Tgr0';
 
 // Nyuruh browser bikin koneksi ke Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// Data
-const TD = [{ s: 'BTC', n: 'Bitcoin', p: 104287, ch: 2.34, ic: 'fa-brands fa-bitcoin', icc: 'text-orange-400' }, { s: 'ETH', n: 'Ethereum', p: 2541, ch: 1.87, ic: 'fa-brands fa-ethereum', icc: 'text-chain-info' }, { s: 'SOL', n: 'Solana', p: 142.87, ch: -0.92, ic: 'fa-solid fa-sun', icc: 'text-purple-400' }, { s: 'LINK', n: 'Chainlink', p: 17.83, ch: 5.67, ic: 'fa-solid fa-link', icc: 'text-blue-400' }, { s: 'AAVE', n: 'Aave', p: 168.24, ch: 4.12, ic: 'fa-solid fa-ghost', icc: 'text-purple-300' }, { s: 'DOGE', n: 'Dogecoin', p: 0.164, ch: 8.21, ic: 'fa-solid fa-dog', icc: 'text-yellow-300' }];
+
+// Data - TAMBAHIN PROPERTY 'id' SESUAI DATABASE COINGECKO
+const TD = [
+    { id: 'bitcoin', s: 'BTC', n: 'Bitcoin', p: 104287, ch: 2.34, ic: 'fa-brands fa-bitcoin', icc: 'text-orange-400' }, 
+    { id: 'ethereum', s: 'ETH', n: 'Ethereum', p: 2541, ch: 1.87, ic: 'fa-brands fa-ethereum', icc: 'text-chain-info' }, 
+    { id: 'solana', s: 'SOL', n: 'Solana', p: 142.87, ch: -0.92, ic: 'fa-solid fa-sun', icc: 'text-purple-400' }, 
+    { id: 'chainlink', s: 'LINK', n: 'Chainlink', p: 17.83, ch: 5.67, ic: 'fa-solid fa-link', icc: 'text-blue-400' }, 
+    { id: 'aave', s: 'AAVE', n: 'Aave', p: 168.24, ch: 4.12, ic: 'fa-solid fa-ghost', icc: 'text-purple-300' }, 
+    { id: 'dogecoin', s: 'DOGE', n: 'Dogecoin', p: 0.164, ch: 8.21, ic: 'fa-solid fa-dog', icc: 'text-yellow-300' }
+];
+
 const TI = [{ l: 'BTC', pr: '$104,287', c: '+2.34%', u: true }, { l: 'ETH', pr: '$2,541', c: '+1.87%', u: true }, { l: 'SOL', pr: '$142', c: '-0.92%', u: false }, { l: 'LINK', pr: '$17.83', c: '+5.67%', u: true }, { l: 'AAVE', pr: '$168', c: '+4.12%', u: true }, { l: 'DOGE', pr: '$0.164', c: '+8.21%', u: true }];
 const LLB = [{ pr: '$108,500', ll: '$42.8M', sl: '$2.1M', lp: 88, sp: 12, cl: true }, { pr: '$106,200', ll: '$28.4M', sl: '$5.7M', lp: 72, sp: 22 }, { pr: '$104,800', ll: '$18.2M', sl: '$8.4M', lp: 55, sp: 32 }, { pr: '$104,287', ll: '$12.1M', sl: '$12.1M', lp: 42, sp: 42, cu: true }, { pr: '$102,800', ll: '$24.6M', sl: '$14.2M', lp: 38, sp: 48 }, { pr: '$100,500', ll: '$38.7M', sl: '$18.9M', lp: 30, sp: 58, cl: true }, { pr: '$98,200', ll: '$52.4M', sl: '$24.1M', lp: 22, sp: 72 }, { pr: '$95,000', ll: '$68.2M', sl: '$32.8M', lp: 15, sp: 85, cl: true }];
 const LLE = [{ pr: '$2,680', ll: '$18.4M', sl: '$2.8M', lp: 82, sp: 15 }, { pr: '$2,580', ll: '$12.2M', sl: '$6.4M', lp: 58, sp: 35 }, { pr: '$2,541', ll: '$8.8M', sl: '$8.8M', lp: 42, sp: 42, cu: true }, { pr: '$2,440', ll: '$16.8M', sl: '$14.2M', lp: 35, sp: 52 }, { pr: '$2,320', ll: '$24.7M', sl: '$22.4M', lp: 25, sp: 68, cl: true }];
