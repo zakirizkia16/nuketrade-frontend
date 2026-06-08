@@ -31,6 +31,7 @@ function formatLargeNum(num) {
 }
 
 // Main Logic
+// Main Logic
 async function loadTokenData() {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenId = urlParams.get('id');
@@ -43,33 +44,43 @@ async function loadTokenData() {
     // Fetch Data Detail Koin
     const detail = await fetchWithAuth(`${API_BASE}/data?endpoint=token_detail&id=${tokenId}`);
     
-    if (detail) {
-        document.getElementById('tokenName').innerText = detail.name;
-        document.getElementById('tokenSymbol').innerText = detail.symbol;
-        
-        const price = detail.market_data.current_price.usd;
-        const change = detail.market_data.price_change_percentage_24h;
-        
-        document.getElementById('tokenPrice').innerText = '$' + price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6});
-        
-        const changeEl = document.getElementById('tokenChange');
-        changeEl.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-        changeEl.className = 'text-sm mt-1 font-medium ' + (change >= 0 ? 'text-chain-accent' : 'text-chain-danger');
+    // Cek kalau data nggak ada atau error dari CoinGecko
+    if (!detail || detail.error || !detail.market_data) {
+        document.getElementById('tokenName').innerText = "Data Not Available";
+        document.getElementById('tokenPrice').innerText = "N/A";
+        document.getElementById('tokenChange').innerText = "API Limit / Coin Not Found";
+        console.warn("Gagal load detail koin:", detail);
+        return; // Hentikan eksekusi biar nggak crash di bawah
+    }
 
-        document.getElementById('statMcap').innerText = formatLargeNum(detail.market_data.market_cap.usd);
-        document.getElementById('statVol').innerText = formatLargeNum(detail.market_data.total_volume.usd);
-        document.getElementById('statChain').innerText = detail.detailing?.platforms ? Object.keys(detail.detailing.platforms)[0]?.charAt(0).toUpperCase() + " Network" : "Native";
+    document.getElementById('tokenName').innerText = detail.name || 'Unknown';
+    document.getElementById('tokenSymbol').innerText = detail.symbol || '';
+    
+    // Pake ?. dan || 0 biar nggak crash kalau datanya null
+    const price = detail.market_data.current_price?.usd || 0;
+    const change = detail.market_data.price_change_percentage_24h || 0;
+    
+    document.getElementById('tokenPrice').innerText = '$' + price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6});
+    
+    const changeEl = document.getElementById('tokenChange');
+    changeEl.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+    changeEl.className = 'text-sm mt-1 font-medium ' + (change >= 0 ? 'text-chain-accent' : 'text-chain-danger');
 
-        if (detail.image?.thumb) {
-            const img = document.getElementById('tokenImg');
-            img.src = detail.image.thumb;
-            img.classList.remove('hidden');
-        }
+    document.getElementById('statMcap').innerText = formatLargeNum(detail.market_data.market_cap?.usd || 0);
+    document.getElementById('statVol').innerText = formatLargeNum(detail.market_data.total_volume?.usd || 0);
+    
+    // Perbaikan: CoinGecko pakai detail.asset_platform_id, bukan detailing
+    document.getElementById('statChain').innerText = detail.asset_platform_id ? detail.asset_platform_id.charAt(0).toUpperCase() + detail.asset_platform_id.slice(1) : "Native";
+
+    if (detail.image?.thumb) {
+        const img = document.getElementById('tokenImg');
+        img.src = detail.image.thumb;
+        img.classList.remove('hidden');
     }
 
     // Fetch Data Chart Harga (7 Hari)
     const chartData = await fetchWithAuth(`${API_BASE}/data?endpoint=token_chart&id=${tokenId}`);
-    if (chartData) {
+    if (chartData && chartData.prices) { // Cek kalau chartData valid
         const prices = chartData.prices.map(p => p[1]);
         const labels = chartData.prices.map(p => {
             const d = new Date(p[0]);
@@ -97,6 +108,8 @@ async function loadTokenData() {
                 scales: { x: { display: false }, y: { display: false } }
             }
         });
+    } else {
+        console.warn("Gagal load chart data");
     }
 
     // Render Pie Chart Holders (Simulasi)
