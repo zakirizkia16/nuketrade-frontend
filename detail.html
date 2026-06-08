@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuke Trade - Token Detail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #060b0a; color: #c8e0d4; font-family: 'JetBrains Mono', monospace; }
+        .stat-box { background: #111c18; border: 1px solid #1a2e26; border-radius: 8px; padding: 12px; }
+    </style>
+</head>
+<body class="p-4 md:p-8 max-w-3xl mx-auto">
+    <!-- Back Button -->
+    <button onclick="window.history.back()" class="text-chain-muted hover:text-chain-bright mb-6 text-sm flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </button>
+
+    <!-- Header Info -->
+    <div class="flex items-center gap-4 mb-6">
+        <img id="tokenImg" src="" class="w-10 h-10 rounded-full hidden" alt="">
+        <div>
+            <h1 class="text-2xl font-bold text-chain-bright"><span id="tokenName">Loading...</span> <span id="tokenSymbol" class="text-chain-muted text-sm uppercase"></span></h1>
+        </div>
+    </div>
+
+    <!-- Price & Change -->
+    <div class="mb-8">
+        <div class="text-4xl font-bold text-chain-bright" id="tokenPrice">$0.00</div>
+        <div class="text-sm mt-1" id="tokenChange">+0.00%</div>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-[#111c18] border border-[#1a2e26] rounded-xl p-4 mb-8" style="height: 300px;">
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="stat-box">
+            <div class="text-[10px] text-chain-muted uppercase mb-1">Market Cap</div>
+            <div class="text-sm text-chain-bright font-medium" id="statMcap">-</div>
+        </div>
+        <div class="stat-box">
+            <div class="text-[10px] text-chain-muted uppercase mb-1">24H Volume</div>
+            <div class="text-sm text-chain-bright font-medium" id="statVol">-</div>
+        </div>
+        <div class="stat-box">
+            <div class="text-[10px] text-chain-muted uppercase mb-1">Holders</div>
+            <div class="text-sm text-chain-bright font-medium" id="statHolders">5.6M</div> <!-- Data ini simulasi -->
+        </div>
+        <div class="stat-box">
+            <div class="text-[10px] text-chain-muted uppercase mb-1">Chain</div>
+            <div class="text-sm text-chain-bright font-medium" id="statChain">-</div>
+        </div>
+    </div>
+
+    <!-- Holders Distribution (Pie Chart - Simulasi) -->
+    <div class="bg-[#111c18] border border-[#1a2e26] rounded-xl p-4 mb-8" style="height: 250px;">
+        <h3 class="text-xs text-chain-muted mb-4 uppercase">Holders Distribution (Simulated)</h3>
+        <canvas id="holdersChart"></canvas>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/detail.js"></script>
+</body>
+</html>
