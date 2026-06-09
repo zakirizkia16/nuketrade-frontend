@@ -122,7 +122,43 @@ function setupEventListeners() {
     function cS(){sO.classList.remove('active');sI.blur();}
     document.getElementById('searchBtnD').addEventListener('click',oS);
     document.getElementById('searchBtnM').addEventListener('click',oS);
-    sI.addEventListener('input',e=>{const q=e.target.value.toLowerCase(),r=document.getElementById('searchRes');if(!q.trim()){r.innerHTML='<div class="px-4 py-6 text-center text-chain-muted text-xs">Type to search...</div>';return;}const m=TD.filter(t=>t.s.toLowerCase().includes(q)||t.n.toLowerCase().includes(q));r.innerHTML=m.length?m.map(t=>`<div class="sr-item flex items-center gap-3 px-4 py-3 cursor-pointer" onclick="window.location.href='/detail.html?id=${t.id}'" data-s="${t.s}"><i class="${t.ic} ${t.icc}"></i><span class="text-sm text-chain-bright">${t.s}</span><span class="text-[10px] text-chain-muted">${t.n}</span><span class="cv text-[10px] ml-auto ${t.ch>=0?'text-chain-accent':'text-chain-danger'}">${t.ch>=0?'+':''}${t.ch}%</span></div>`).join(''):'<div class="px-4 py-6 text-center text-chain-muted text-xs">No results</div>';});
+        // Variabel buat Debounce (mencegah spam API kalau ngetik cepat)
+    let searchTimeout;
+
+    sI.addEventListener('input', e => {
+        clearTimeout(searchTimeout); // Reset timer tiap ngetik
+        const q = e.target.value.trim();
+        const r = document.getElementById('searchRes');
+
+        if (!q || q.length < 2) {
+            r.innerHTML = '<div class="px-4 py-6 text-center text-chain-muted text-xs">Type at least 2 characters...</div>';
+            return;
+        }
+
+        // Tampilkan loading
+        r.innerHTML = '<div class="px-4 py-6 text-center text-chain-muted text-xs">Searching...</div>';
+
+        // Debounce: Tunggu 500ms setelah user berhenti ngetik baru fetch
+        searchTimeout = setTimeout(async () => {
+            const data = await fetchWithAuth(`${API_BASE}/data?endpoint=search&q=${q.toLowerCase()}`);
+            
+            if (data && data.coins && data.coins.length > 0) {
+                // Ambil 10 hasil teratas
+                r.innerHTML = data.coins.slice(0, 10).map(c => `
+                    <div class="sr-item flex items-center gap-3 px-4 py-3 cursor-pointer" onclick="window.location.href='/detail.html?id=${c.id}'">
+                        ${c.thumb ? `<img src="${c.thumb}" class="w-5 h-5 rounded-full" alt="">` : '<i class="fa-solid fa-coins text-chain-muted"></i>'}
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm text-chain-bright block truncate">${c.name}</span>
+                            <span class="text-[10px] text-chain-muted uppercase">${c.symbol}</span>
+                        </div>
+                        <span class="text-[10px] text-chain-muted ml-auto">#${c.market_cap_rank || '-'}</span>
+                    </div>
+                `).join('');
+            } else {
+                r.innerHTML = '<div class="px-4 py-6 text-center text-chain-muted text-xs">No results found</div>';
+            }
+        }, 500); 
+    });
     document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();oS();}if(e.key==='Escape'){cS();closeAP();}});
     sO.addEventListener('click',e=>{if(e.target.id==='searchOv')cS();});
 
