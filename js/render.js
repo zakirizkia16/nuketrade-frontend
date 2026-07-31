@@ -357,21 +357,29 @@ function rA() {
     });
 }
 // ==========================================
-// DASHBOARD POSITIONING BOARD
+// DASHBOARD POSITIONING BOARD (DYNAMIC TOP 10)
 // ==========================================
-function renderPositioningBoardDash() {
+async function renderPositioningBoardDash() {
     const el = document.getElementById('positioningTableDash');
     if (!el) return;
 
-    // Koin major buat dashboard
-    const tokens = ['Bitcoin', 'Ethereum', 'Solana', 'Dogecoin', 'Ripple', 'Chainlink'];
+    // Tampilkan loading dulu
+    el.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500 py-6 text-xs">Fetching top crypto data...</td></tr>`;
+
+    // Fetch Top 10 Koin dari Vercel
+    const coins = await fetchWithAuth(`${API_BASE}/data?endpoint=top_coins`);
+    
+    if (!coins || coins.length === 0) {
+        el.innerHTML = `<tr><td colspan="4" class="text-center text-red-400 py-6 text-xs">Failed to load market data. Try again later.</td></tr>`;
+        return;
+    }
 
     let html = '';
-    tokens.forEach(name => {
-        // Bikin angka random konsisten berdasarkan nama koin
-        const hashStr = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        const smartCOT = (hashStr % 60) + 20; // Range 20-80
-        const retailLong = (hashStr % 70) + 15; // Range 15-85
+    coins.forEach(coin => {
+        // Bikin angka random konsisten berdasarkan ID koin dari API
+        const hashStr = coin.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const smartCOT = (hashStr % 60) + 20; 
+        const retailLong = (hashStr % 70) + 15; 
         const retailShort = 100 - retailLong;
         
         // Logika Sinyal
@@ -386,14 +394,18 @@ function renderPositioningBoardDash() {
             signalText = 'EKSTRIM SHORT'; signalColor = 'text-red-400'; 
         }
 
-        // Warna bar Smart Money
         const smartBarColor = smartCOT >= 50 ? 'bg-green-500' : 'bg-red-500';
 
         html += `
             <tr class="border-b border-chain-border last:border-0 hover:bg-[#0a1410]">
                 <td class="py-3 px-3 align-middle">
-                    <div class="text-sm text-white font-bold">${name}</div>
-                    <div class="text-[10px] text-gray-500 uppercase">${name.substring(0,3)}</div>
+                    <div class="flex items-center gap-2">
+                        <img src="${coin.image}" class="w-5 h-5 rounded-full" alt="${coin.name}">
+                        <div>
+                            <div class="text-sm text-white font-bold">${coin.name}</div>
+                            <div class="text-[10px] text-gray-500 uppercase">${coin.symbol}</div>
+                        </div>
+                    </div>
                 </td>
                 <td class="py-3 px-3 align-middle">
                     <div class="flex items-center gap-2">
