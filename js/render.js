@@ -35,11 +35,13 @@ function renderAll() {
     renderLiqTable(); 
     renderInflowTable(); 
     renderWhaleFeedTable();
+    renderPositioningBoardDash();
 }
 
 // ==========================================
 // SECTION RENDERERS
 // ==========================================
+
 
 function rLL() {
     const el = document.getElementById('liqList');
@@ -353,4 +355,77 @@ function rA() {
             rA();
         });
     });
+}
+// ==========================================
+// DASHBOARD POSITIONING BOARD
+// ==========================================
+function renderPositioningBoardDash() {
+    const el = document.getElementById('positioningTableDash');
+    if (!el) return;
+
+    // Koin major buat dashboard
+    const tokens = ['Bitcoin', 'Ethereum', 'Solana', 'Dogecoin', 'Ripple', 'Chainlink'];
+
+    let html = '';
+    tokens.forEach(name => {
+        // Bikin angka random konsisten berdasarkan nama koin
+        const hashStr = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const smartCOT = (hashStr % 60) + 20; // Range 20-80
+        const retailLong = (hashStr % 70) + 15; // Range 15-85
+        const retailShort = 100 - retailLong;
+        
+        // Logika Sinyal
+        let signalText = 'NEUTRAL';
+        let signalColor = 'text-gray-400';
+        
+        if (Math.abs(smartCOT - (100-retailLong)) > 40) { 
+            signalText = 'DIVERGENT'; signalColor = 'text-orange-400'; 
+        } else if (smartCOT > 70) { 
+            signalText = 'EKSTRIM LONG'; signalColor = 'text-green-400'; 
+        } else if (smartCOT < 30) { 
+            signalText = 'EKSTRIM SHORT'; signalColor = 'text-red-400'; 
+        }
+
+        // Warna bar Smart Money
+        const smartBarColor = smartCOT >= 50 ? 'bg-green-500' : 'bg-red-500';
+
+        html += `
+            <tr class="border-b border-chain-border last:border-0 hover:bg-[#0a1410]">
+                <td class="py-3 px-3 align-middle">
+                    <div class="text-sm text-white font-bold">${name}</div>
+                    <div class="text-[10px] text-gray-500 uppercase">${name.substring(0,3)}</div>
+                </td>
+                <td class="py-3 px-3 align-middle">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden min-w-[80px]">
+                            <div class="h-full ${smartBarColor} rounded-full" style="width: ${smartCOT}%"></div>
+                        </div>
+                        <span class="cv text-xs text-chain-bright font-medium w-12 text-right">${smartCOT}/100</span>
+                    </div>
+                </td>
+                <td class="py-3 px-3 align-middle">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden flex min-w-[80px]">
+                            <div class="h-full bg-green-500" style="width: ${retailLong}%"></div>
+                            <div class="h-full bg-red-500" style="width: ${retailShort}%"></div>
+                        </div>
+                        <span class="cv text-xs text-chain-bright font-medium w-16 text-right">${retailLong}% Long</span>
+                    </div>
+                </td>
+                <td class="py-3 px-3 align-middle text-right">
+                    <span class="text-[10px] font-bold uppercase ${signalColor}">${signalText}</span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    el.innerHTML = html;
+
+    // Update Timestamp
+    const tsEl = document.getElementById('pbTimestampDash');
+    if (tsEl) {
+        const now = new Date();
+        const options = { weekday: 'long', hour: '2-digit', minute: '2-digit' };
+        tsEl.innerText = now.toLocaleDateString('id-ID', options) + ' WIB';
+    }
 }

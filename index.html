@@ -108,6 +108,41 @@
     </div>
 </section>
 
+<!-- POSITIONING BOARD -->
+<section id="positioning" class="py-6 sm:py-8">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
+        <div class="flex items-center gap-2.5 mb-4 fade-in">
+            <div class="w-8 h-8 rounded-lg bg-chain-purple/10 border border-chain-purple/20 flex items-center justify-center">
+                <i class="fa-solid fa-chess-knight text-chain-purple text-xs"></i>
+            </div>
+            <div>
+                <h2 class="font-display font-bold text-lg sm:text-xl text-chain-bright">Positioning Board</h2>
+                <p class="text-chain-muted text-[10px] sm:text-xs hidden sm:block">Smart Money vs Retail Sentiment</p>
+            </div>
+        </div>
+        
+        <div class="bg-chain-card rounded-lg border border-chain-border overflow-hidden fade-in" data-delay="20">
+            <div class="flex justify-between items-center px-3 py-2.5 border-b border-chain-border">
+                <span class="text-xs font-semibold text-chain-bright">Market Overview</span>
+                <span id="pbTimestampDash" class="text-[10px] text-chain-muted">--</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[600px]">
+                    <thead>
+                        <tr class="text-chain-muted border-b border-chain-border">
+                            <th class="py-2 px-3 font-medium w-1/4">Asset</th>
+                            <th class="py-2 px-3 font-medium w-1/3">Smart Money (COT)</th>
+                            <th class="py-2 px-3 font-medium w-1/3">Retail</th>
+                            <th class="py-2 px-3 font-medium text-right w-1/6">Signal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positioningTableDash"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- LIQUIDATION MAP -->
 <section id="liquidation" class="py-6 sm:py-10 bg-chain-surface/30">
     <div class="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
