@@ -1,9 +1,6 @@
-// HAPUS BARIS INI DARI KODE LO:
-// const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Fungsi Fetch dengan Auth (sama kayak di app.js)
+// Fungsi Fetch dengan Auth
 async function fetchWithAuth(url) {
-    const { data: { session } } = await supabaseClient.auth.getSession(); // Sekarang supabaseClient bakal kebaca dari config.js
+    const { data: { session } } = await supabaseClient.auth.getSession();
     const token = session?.access_token;
     if (!token) return window.location.href = '/login.html';
 
@@ -22,7 +19,7 @@ async function checkAuth() {
 }
 checkAuth();
 
-// Fungsi format angka besar (Miliar, Triliun)
+// Fungsi format angka besar
 function formatLargeNum(num) {
     if (num >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
     if (num >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
@@ -30,7 +27,6 @@ function formatLargeNum(num) {
     return '$' + num?.toLocaleString();
 }
 
-// Main Logic
 // Main Logic
 async function loadTokenData() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -41,22 +37,21 @@ async function loadTokenData() {
         return;
     }
 
-    // Fetch Data Detail Koin
+    // 1. Fetch Data Detail Koin
     const detail = await fetchWithAuth(`${API_BASE}/data?endpoint=token_detail&id=${tokenId}`);
     
-    // Cek kalau data nggak ada atau error dari CoinGecko
     if (!detail || detail.error || !detail.market_data) {
         document.getElementById('tokenName').innerText = "Data Not Available";
         document.getElementById('tokenPrice').innerText = "N/A";
         document.getElementById('tokenChange').innerText = "API Limit / Coin Not Found";
         console.warn("Gagal load detail koin:", detail);
-        return; // Hentikan eksekusi biar nggak crash di bawah
+        return;
     }
 
+    // Update Header Info
     document.getElementById('tokenName').innerText = detail.name || 'Unknown';
     document.getElementById('tokenSymbol').innerText = detail.symbol || '';
     
-    // Pake ?. dan || 0 biar nggak crash kalau datanya null
     const price = detail.market_data.current_price?.usd || 0;
     const change = detail.market_data.price_change_percentage_24h || 0;
     
@@ -66,79 +61,18 @@ async function loadTokenData() {
     changeEl.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
     changeEl.className = 'text-sm mt-1 font-medium ' + (change >= 0 ? 'text-chain-accent' : 'text-chain-danger');
 
-    document.getElementById('statMcap').innerText = formatLargeNum(detail.market_data.market_cap?.usd || 0);
-    document.getElementById('statVol').innerText = formatLargeNum(detail.market_data.total_volume?.usd || 0);
-    
-    // Perbaikan: CoinGecko pakai detail.asset_platform_id, bukan detailing
-    document.getElementById('statChain').innerText = detail.asset_platform_id ? detail.asset_platform_id.charAt(0).toUpperCase() + detail.asset_platform_id.slice(1) : "Native";
-
     if (detail.image?.thumb) {
         const img = document.getElementById('tokenImg');
         img.src = detail.image.thumb;
         img.classList.remove('hidden');
     }
 
-    // Fetch Data Chart Harga (7 Hari)
-    const chartData = await fetchWithAuth(`${API_BASE}/data?endpoint=token_chart&id=${tokenId}`);
-    if (chartData && chartData.prices) { // Cek kalau chartData valid
-        const prices = chartData.prices.map(p => p[1]);
-        const labels = chartData.prices.map(p => {
-            const d = new Date(p[0]);
-            return d.getDate() + '/' + (d.getMonth()+1);
-        });
-
-        const ctx = document.getElementById('priceChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: prices,
-                    borderColor: '#00ff88',
-                    borderWidth: 1.5,
-                    fill: true,
-                    backgroundColor: 'rgba(0,255,136,0.06)',
-                    pointRadius: 0,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { x: { display: false }, y: { display: false } }
-            }
-        });
-    } else {
-        console.warn("Gagal load chart data");
-    }
-
-    // Render Pie Chart Holders (Simulasi)
-    const ctxHolders = document.getElementById('holdersChart').getContext('2d');
-    new Chart(ctxHolders, {
-        type: 'doughnut',
-        data: {
-            labels: ['Whales', 'Institutions', 'Retail'],
-            datasets: [{
-                data: [35, 25, 40],
-                backgroundColor: ['#ff3558', '#00c2ff', '#00ff88'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { color: '#4a6b5d', font: { family: "'JetBrains Mono', monospace", size: 10 } } } }
-        }
-    });
-}
     // ==========================================
-    // RENDER POSITIONING BOARD (KAYAK GAMBAR)
+    // 2. RENDER POSITIONING BOARD
     // ==========================================
     const positioningTable = document.getElementById('positioningTableBody');
-    
-    // Kita bikin list aset major buat perbandingan
     const otherTokens = ['Bitcoin', 'Ethereum', 'Solana', 'Dogecoin', 'Ripple'];
     
-    // Pastikan koin yang lagi dibuka ada di urutan paling atas
     if (!otherTokens.includes(detail.name)) {
         otherTokens.unshift(detail.name);
     } else {
@@ -148,12 +82,10 @@ async function loadTokenData() {
 
     let posHtml = '';
     otherTokens.forEach(name => {
-        // Bikin angka random konsisten berdasarkan nama koin
         const hashStr = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        const smartCOT = (hashStr % 60) + 20; // Range 20-80
-        const retailLong = (hashStr % 70) + 15; // Range 15-85
+        const smartCOT = (hashStr % 60) + 20; 
+        const retailLong = (hashStr % 70) + 15; 
         
-        // Logika Sinyal persis kayak gambar
         let signalText = 'NEUTRAL';
         let signalColor = 'text-chain-muted';
         
@@ -165,11 +97,9 @@ async function loadTokenData() {
             signalText = 'EKSTRIM SHORT'; signalColor = 'text-chain-danger'; 
         }
 
-        // Warna bar
         const smartBarColor = smartCOT >= 50 ? 'bg-chain-accent' : 'bg-chain-danger';
-        const retailBarColor = retailLong >= 50 ? 'bg-chain-danger' : 'bg-chain-accent'; // Retail kebanyakan Long = Bahaya (Merah)
+        const retailBarColor = retailLong >= 50 ? 'bg-chain-danger' : 'bg-chain-accent';
 
-        // Highlight koin yang lagi dibuka
         const isActive = name === detail.name;
 
         posHtml += `
@@ -203,7 +133,69 @@ async function loadTokenData() {
     
     positioningTable.innerHTML = posHtml;
 
-    // Update Timestamp
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     document.getElementById('pbTimestamp').innerText = now.toLocaleDateString('id-ID', options) + ' WIB';
+
+    // ==========================================
+    // 3. FETCH & RENDER CHART HARGA
+    // ==========================================
+    const chartData = await fetchWithAuth(`${API_BASE}/data?endpoint=token_chart&id=${tokenId}`);
+    if (chartData && chartData.prices) {
+        const prices = chartData.prices.map(p => p[1]);
+        const labels = chartData.prices.map(p => {
+            const d = new Date(p[0]);
+            return d.getDate() + '/' + (d.getMonth()+1);
+        });
+
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: [{ data: prices, borderColor: '#00ff88', borderWidth: 1.5, fill: true, backgroundColor: 'rgba(0,255,136,0.06)', pointRadius: 0, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+    }
+
+    // ==========================================
+    // 4. RENDER PIE CHART HOLDERS (SIMULASI)
+    // ==========================================
+    const ctxHolders = document.getElementById('holdersChart').getContext('2d');
+    new Chart(ctxHolders, {
+        type: 'doughnut',
+        data: { labels: ['Whales', 'Institutions', 'Retail'], datasets: [{ data: [35, 25, 40], backgroundColor: ['#ff3558', '#00c2ff', '#00ff88'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#4a6b5d', font: { family: "'JetBrains Mono', monospace", size: 10 } } } } }
+    });
+
+    // ==========================================
+    // 5. RENDER TABEL TOP INFLOW TXNS (SIMULASI)
+    // ==========================================
+    const inflowTable = document.getElementById('inflowTableBody');
+    const signals = ['bearish', 'bullish', 'neutral'];
+    const exchanges = ['Binance', 'Coinbase', 'OKX', 'Bybit', 'Kraken', 'Uniswap'];
+    const wallets = ['0x3f5c...a8c2', '0x7d2F...f1E9', '0xd7F4...D2f4', '0x2ba7...A4c6', '0xab1C...C1e3'];
+    
+    let tableHtml = '';
+    for(let i = 0; i < 5; i++) {
+        const time = `${i*2 + 1}m ago`;
+        const from = wallets[Math.floor(Math.random() * wallets.length)];
+        const to = exchanges[Math.floor(Math.random() * exchanges.length)];
+        const amount = (Math.random() * 1000).toFixed(2) + ' ' + (detail.symbol || 'TKN').toUpperCase();
+        const value = '$' + (Math.random() * 50).toFixed(1) + 'M';
+        const signal = signals[Math.floor(Math.random() * signals.length)];
+        
+        const signalColor = signal === 'bullish' ? 'text-chain-accent' : signal === 'bearish' ? 'text-chain-danger' : 'text-chain-muted';
+        
+        tableHtml += `
+            <tr class="border-b border-[#1a2e26] last:border-0 hover:bg-[#0a1410]">
+                <td class="py-2 px-2 text-chain-muted">${time}</td>
+                <td class="py-2 px-2 text-chain-bright font-medium uppercase">${detail.symbol || 'TKN'}</td>
+                <td class="py-2 px-2 text-chain-muted hidden md:table-cell font-mono">${from}</td>
+                <td class="py-2 px-2 text-chain-muted hidden md:table-cell">${to}</td>
+                <td class="py-2 px-2 text-chain-bright">${amount}</td>
+                <td class="py-2 px-2 text-chain-bright font-medium">${value}</td>
+                <td class="py-2 px-2 ${signalColor} uppercase font-medium text-[10px]">${signal}</td>
+            </tr>
+        `;
+    }
+    inflowTable.innerHTML = tableHtml;
+} // <--- INI KURUNG TUTUP YANG BENER UNTUK loadTokenData
