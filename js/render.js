@@ -180,23 +180,45 @@ function renderInflowTable() {
     const el = document.getElementById('ifTb');
     if (!el) return;
 
-    el.innerHTML = IT.map(t => {
-        const signalColors = {
-            bearish: 'bg-chain-danger/10 text-chain-danger',
-            bullish: 'bg-chain-accent/10 text-chain-accent',
-            neutral: 'bg-chain-muted/10 text-chain-muted'
-        };
-        const sigClass = signalColors[t.sg] || signalColors.neutral;
+    // Fungsi buat ngambil angka dari string (misal "$87.8M" jadi 87.8)
+    const getNum = (str) => parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+    
+    // Cari transaksi terbesar buat patokan panjang bar (max 100%)
+    const maxInflowVal = Math.max(...IT.map(t => getNum(t.vl)));
 
+    el.innerHTML = IT.map(t => {
+        const txVal = getNum(t.vl);
+        // Minimal bar 10% biar keliatan
+        const barWidth = Math.max(10, (txVal / maxInflowVal) * 100);
+        
+        // Warna bar dan teks sesuai sinyal
+        const barColor = t.sg === 'bullish' ? 'bg-green-500' : t.sg === 'bearish' ? 'bg-red-500' : 'bg-yellow-500';
+        const textColor = t.sg === 'bullish' ? 'text-green-400' : t.sg === 'bearish' ? 'text-red-400' : 'text-yellow-400';
+        
         return `
-            <tr>
-                <td data-l="Time" class="cv text-chain-muted">${t.t}</td>
-                <td data-l="Token" class="font-medium text-chain-bright">${t.tk}</td>
-                <td data-l="From" class="cv text-chain-text">${t.fr}</td>
-                <td data-l="To" class="text-chain-text">${t.to}</td>
-                <td data-l="Amount" class="cv text-chain-bright">${t.am}</td>
-                <td data-l="Value" class="cv text-chain-warn font-medium">${t.vl}</td>
-                <td data-l="Signal">${createTag(t.sg, sigClass, '')}</td>
+            <tr class="border-b border-chain-border last:border-0 hover:bg-[#0a1410]">
+                <td class="py-3 px-2 align-middle" data-l="Token/Time">
+                    <div class="text-sm text-white font-bold uppercase">${t.tk}</div>
+                    <div class="text-[10px] text-gray-500">${t.t}</div>
+                </td>
+                <td class="py-3 px-2 align-middle hidden md:table-cell" data-l="Flow">
+                    <div class="text-xs text-gray-400 font-mono">${t.fr}</div>
+                    <div class="text-[10px] text-gray-500">→ ${t.to}</div>
+                </td>
+                <td class="py-3 px-2 align-middle" data-l="Value">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 h-2 bg-[#060b0a] rounded-full overflow-hidden min-w-[100px]">
+                            <div class="h-full ${barColor} rounded-full" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="text-right whitespace-nowrap">
+                            <div class="text-xs text-white font-medium">${t.vl}</div>
+                            <div class="text-[10px] text-gray-500">${t.am}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-2 align-middle text-right" data-l="Signal">
+                    <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-[#060b0a] ${textColor}">${t.sg}</span>
+                </td>
             </tr>
         `;
     }).join('');
