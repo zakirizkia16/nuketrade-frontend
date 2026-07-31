@@ -130,3 +130,80 @@ async function loadTokenData() {
         }
     });
 }
+    // ==========================================
+    // RENDER POSITIONING BOARD (KAYAK GAMBAR)
+    // ==========================================
+    const positioningTable = document.getElementById('positioningTableBody');
+    
+    // Kita bikin list aset major buat perbandingan
+    const otherTokens = ['Bitcoin', 'Ethereum', 'Solana', 'Dogecoin', 'Ripple'];
+    
+    // Pastikan koin yang lagi dibuka ada di urutan paling atas
+    if (!otherTokens.includes(detail.name)) {
+        otherTokens.unshift(detail.name);
+    } else {
+        otherTokens.splice(otherTokens.indexOf(detail.name), 1);
+        otherTokens.unshift(detail.name);
+    }
+
+    let posHtml = '';
+    otherTokens.forEach(name => {
+        // Bikin angka random konsisten berdasarkan nama koin
+        const hashStr = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const smartCOT = (hashStr % 60) + 20; // Range 20-80
+        const retailLong = (hashStr % 70) + 15; // Range 15-85
+        
+        // Logika Sinyal persis kayak gambar
+        let signalText = 'NEUTRAL';
+        let signalColor = 'text-chain-muted';
+        
+        if (Math.abs(smartCOT - (100-retailLong)) > 40) { 
+            signalText = 'DIVERGENT'; signalColor = 'text-yellow-400'; 
+        } else if (smartCOT > 70) { 
+            signalText = 'EKSTRIM LONG'; signalColor = 'text-chain-accent'; 
+        } else if (smartCOT < 30) { 
+            signalText = 'EKSTRIM SHORT'; signalColor = 'text-chain-danger'; 
+        }
+
+        // Warna bar
+        const smartBarColor = smartCOT >= 50 ? 'bg-chain-accent' : 'bg-chain-danger';
+        const retailBarColor = retailLong >= 50 ? 'bg-chain-danger' : 'bg-chain-accent'; // Retail kebanyakan Long = Bahaya (Merah)
+
+        // Highlight koin yang lagi dibuka
+        const isActive = name === detail.name;
+
+        posHtml += `
+            <tr class="border-b border-[#1a2e26] last:border-0 ${isActive ? 'bg-[#0a1410]' : ''}">
+                <td class="py-3 px-2">
+                    <div class="text-sm ${isActive ? 'text-chain-accent font-bold' : 'text-chain-bright font-medium'}">${name}</div>
+                    <div class="text-[10px] text-chain-muted uppercase">${name.substring(0,3)}</div>
+                </td>
+                <td class="py-3 px-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden">
+                            <div class="h-full ${smartBarColor} rounded-full" style="width: ${smartCOT}%"></div>
+                        </div>
+                        <span class="text-chain-bright font-medium w-12 text-right">${smartCOT}/100</span>
+                    </div>
+                </td>
+                <td class="py-3 px-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden">
+                            <div class="h-full ${retailBarColor} rounded-full" style="width: ${retailLong}%"></div>
+                        </div>
+                        <span class="text-chain-bright font-medium w-16 text-right">${retailLong}% Long</span>
+                    </div>
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <span class="text-[10px] font-bold uppercase ${signalColor}">${signalText}</span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    positioningTable.innerHTML = posHtml;
+
+    // Update Timestamp
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    document.getElementById('pbTimestamp').innerText = now.toLocaleDateString('id-ID', options) + ' WIB';
