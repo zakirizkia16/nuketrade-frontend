@@ -100,8 +100,11 @@ async function loadTokenData() {
             signalColor = 'text-red-400'; // Merah
         }
 
+        // Warna bar Smart Money (Satu warna)
         const smartBarColor = smartCOT >= 50 ? 'bg-green-500' : 'bg-red-500';
-        const retailBarColor = retailLong >= 50 ? 'bg-red-500' : 'bg-green-500';
+
+        // Warna bar Retail (Dua warna: Ijo & Merah berdampingan)
+        const retailShort = 100 - retailLong;
 
         const isActive = name === detail.name;
 
@@ -121,8 +124,9 @@ async function loadTokenData() {
                 </td>
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
-                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden">
-                            <div class="h-full ${retailBarColor} rounded-full" style="width: ${retailLong}%"></div>
+                        <div class="flex-1 h-1.5 bg-[#060b0a] rounded-full overflow-hidden flex">
+                            <div class="h-full bg-green-500" style="width: ${retailLong}%"></div>
+                            <div class="h-full bg-red-500" style="width: ${retailShort}%"></div>
                         </div>
                         <span class="text-chain-bright font-medium w-16 text-right">${retailLong}% Long</span>
                     </div>
